@@ -135,6 +135,32 @@ function defaultExemplo(q){
   return `Exemplo simples: pensa num caso cotidiano e aplica a regra básica de ${disc} sem inventar exceções.`;
 }
 
+
+
+function renderRefs(q){
+  const refs = Array.isArray(q.refs) ? q.refs : [];
+  if(!refs.length) return "<span class=\"mono\">—</span>";
+  const items = refs.slice(0,4).map(r=>{
+    const fonte = (r.fonte||"").toString();
+    const disp = (r.dispositivo||"").toString();
+    const url = (r.url||"").toString();
+    const label = [fonte, disp].filter(Boolean).join(" — ");
+    return url ? `<a href="${escapeAttr(url)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>` : escapeHtml(label);
+  }).join(" • ");
+  return items || "<span class=\"mono\">—</span>";
+}
+function renderAltRationales(q){
+  const alts = q.alternativas || {};
+  const com = q.comentarios_alternativas || {};
+  const order = ["A","B","C","D"];
+  const items = order.filter(L=>alts[L]).map(L=>{
+    const tag = (L===q.gabarito) ? " (gabarito)" : "";
+    const txt = (alts[L]||"");
+    const why = (com[L]||"");
+    return `<div class="item"><div class="t"><b>${L})</b>${tag}</div><div class="d">${escapeHtml(txt)}</div><div class="d"><b>Por quê:</b> ${escapeHtml(why)}</div></div>`;
+  }).join("");
+  return `<details style="margin-top:10px"><summary class="note" style="cursor:pointer">Ver explicação por alternativa</summary><div class="list" style="margin-top:10px">${items||""}</div></details>`;
+}
 function youtubeLink(q){
   const law=Array.isArray(q.fundamentacao_legal)?q.fundamentacao_legal.join(" "):(q.fundamentacao_legal||"");
   const query=encodeURIComponent(`${q.disciplina||"OAB"} ${q.tema||""} ${q.subtema||""} ${law}`.trim());
@@ -161,7 +187,10 @@ async function onAnswer(q, chosen){
     saveErr(state.erros);
   }
 
-  const fund = Array.isArray(q.fundamentacao_legal)?q.fundamentacao_legal:(q.fundamentacao_legal?[q.fundamentacao_legal]:[]);
+  let fund = Array.isArray(q.fundamentacao_legal)?q.fundamentacao_legal:(q.fundamentacao_legal?[q.fundamentacao_legal]:[]);
+  if(!fund.length && Array.isArray(q.refs) && q.refs.length){
+    fund = q.refs.map(r=>[r.fonte,r.dispositivo].filter(Boolean).join(" — ")).filter(Boolean);
+  }
   const video = q.video_reforco || youtubeLink(q);
   const comentario = pickStr(q.comentario_tecnico) || defaultComentario(q, fund);
   const pegadinha = pickStr(q.erro_comum_aluno) || defaultPegadinha(q);
@@ -172,7 +201,7 @@ async function onAnswer(q, chosen){
     ? `<span style="color:var(--ok);font-weight:900">Certo.</span>`
     : `<span style="color:var(--bad);font-weight:900">Errado.</span>`}
     <div class="note" style="margin-top:8px"><b>Comentário (por que é isso):</b> ${escapeHtml(comentario)}</div>
-    <div class="note" style="margin-top:8px"><b>Fundamento legal:</b> ${escapeHtml(fund.join(" • ")||"—")}</div>
+    <div class="note" style="margin-top:8px"><b>Fundamento legal:</b> ${fund.length?escapeHtml(fund.join(" • ")):""} ${renderRefs(q)}</div>
     <div class="note" style="margin-top:8px"><b>Pegadinha/erro comum:</b> ${escapeHtml(pegadinha)}</div>
     <div class="note" style="margin-top:8px"><b>Exemplo simples:</b> ${escapeHtml(exemplo)}</div>
     <div class="note" style="margin-top:10px"><a href="${escapeAttr(video)}" target="_blank" rel="noopener">Vídeo do tema</a></div>
