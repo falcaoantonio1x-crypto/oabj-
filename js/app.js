@@ -1,4 +1,4 @@
-import { $, setActiveTab, escapeHtml, escapeAttr, fmtSec } from "./ui.js";
+import { $, setActiveTab, escapeHtml, escapeAttr, fmtSec, initTheme, toggleTheme } from "./ui.js";
 import { openDB, getMeta, putMeta, clearAll, countQuestions, countDue, bulkUpsertQuestions, listDisciplines, listThemes, listSubthemes, getQuestionById } from "./db.js";
 import { reclassificar } from "./classifier.js";
 import { buildSession, gradeAnswer, getQ } from "./simuladoEngine.js";
@@ -222,6 +222,17 @@ async function onAnswer(q, chosen){
 }
 
 function hooks(){
+  const tb = document.getElementById('btnTheme');
+  if(tb){
+    tb.onclick = ()=>{
+      const mode = toggleTheme();
+      tb.textContent = mode==='dark' ? '🌙' : (mode==='light' ? '☀️' : '🌓');
+    };
+    // set initial icon
+    const el=document.documentElement;
+    tb.textContent = el.classList.contains('theme-dark') ? '🌙' : (el.classList.contains('theme-light') ? '☀️' : '🌓');
+  }
+
   $("btnComecar").addEventListener("click", async ()=>{
     const disc=$("fDisc").value;
     const tema=$("fTema").value;
@@ -230,6 +241,7 @@ function hooks(){
     const qtd=Math.max(5, parseInt($("fQtd").value||"10",10));
     const srs=$("fSRS").checked;
     const reforco=$("fReforco").checked;
+    document.getElementById('cfgDetails')?.removeAttribute('open');
     state.session = await buildSession(state.db,{disc,tema,subtema,nivel,count:qtd,prioritizeSRS:srs,reforco});
     await renderQuestion();
   });
@@ -254,6 +266,7 @@ function hooks(){
   });
 
   $("btnReforco").addEventListener("click", async ()=>{
+    document.getElementById('cfgDetails')?.removeAttribute('open');
     state.session = await buildSession(state.db,{disc:"TODAS",tema:"TODOS",subtema:"TODOS",nivel:"TODOS",count:12,prioritizeSRS:true,reforco:true});
     await renderQuestion();
   });
@@ -308,6 +321,8 @@ function hooks(){
 }
 
 async function boot(){
+  initTheme();
+
   tabs();
   state.db = await openDB();
   // Se mudou a seed (banco/heurística), atualiza do data/questoes.json sem apagar teu progresso

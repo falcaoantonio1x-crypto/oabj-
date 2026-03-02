@@ -9,8 +9,13 @@
 <body>
 <header class="header">
   <div class="wrap">
-    <h1>OAB — Plataforma (IndexedDB + SRS)</h1>
+    <div class="headerTop">
+      <div>
+        <h1>OAB — Plataforma (IndexedDB + SRS)</h1>
     <div class="sub">Banco em IndexedDB (milhares sem travar) • Comentário sempre (certo/errado) • Vídeo automático • Índices por disciplina/tema/subtema</div>
+      </div>
+      <button class="themeBtn" id="btnTheme" title="Alternar tema">🌙</button>
+    </div>
     <nav class="nav">
       <button class="tab active" data-tab="simulado">Simulado</button>
       <button class="tab" data-tab="dashboard">Dashboard</button>
@@ -56,6 +61,9 @@
 
       <div class="card">
         <h3>Config do simulado</h3>
+        <details class="cfg" id="cfgDetails" open>
+          <summary><span>Filtros</span><span class="cfgHint">toque p/ abrir/fechar</span></summary>
+          <div style="margin-top:12px">
 
         <div class="row">
           <div class="field">
@@ -97,6 +105,8 @@
           <button class="btn" id="btnComecar">Começar</button>
         </div>
 
+          </div>
+        </details>
         <div class="hr"></div>
         <p class="note">Base legal brasileira sempre no feedback. Vídeo: busca YouTube por disciplina/tema/lei (pode trocar por link fixo no JSON).</p>
       </div>
@@ -170,6 +180,17 @@
     </div>
   </section>
 </main>
+
+
+<div class="bottomNav">
+  <div class="navInner">
+    <button class="tab active" data-tab="simulado">📝<br>Sim</button>
+    <button class="tab" data-tab="dashboard">📊<br>Dash</button>
+    <button class="tab" data-tab="mapa">🗺️<br>Mapa</button>
+    <button class="tab" data-tab="revisao">🔁<br>Erros</button>
+    <button class="tab" data-tab="importar">⬆️<br>Banco</button>
+  </div>
+</div>
 
 <script type="module" src="js/app.js"></script>
 </body>
